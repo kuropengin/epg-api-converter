@@ -21,12 +21,24 @@ const convert_api = createProxyMiddleware({
   })
 });
 
+const config_api = createProxyMiddleware({ 
+  target: epg_url,
+  changeOrigin: true ,
+  selfHandleResponse: true,
+  onProxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+    const response = responseBuffer.toString('utf8');
+    return response.replace('"socketIOPort":8888', '"socketIOPort":443');
+  })
+});
+
 const normal_api = createProxyMiddleware({ 
   target: epg_url, 
   changeOrigin: true
 });
 
 app.use('/api/streams/live/*/m2ts/playlist', convert_api);
+
+app.use('/api/config', config_api);
 
 app.use('/*', normal_api);
 
